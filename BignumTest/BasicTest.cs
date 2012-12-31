@@ -45,6 +45,13 @@ namespace BignumTest {
         }
 
         [TestMethod]
+        public void CreateFromLong() {
+            var value = GetRandomLong();
+
+            Assert.AreEqual(value, (long)new Bignum(value));
+        }
+
+        [TestMethod]
         public void CreateFromUlong() {
             var value = GetRandomUlong();
 

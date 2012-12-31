@@ -9,7 +9,10 @@ namespace Bignum {
     public struct Bignum {
         // The bignum is composed of an int for the least significant bits
         // and uints for the higher ones.
-        // The int carries the sign of the bignum.
+
+        // The int carries the sign for all numbers. For numbers larger than an
+        // int, it does not use 2s complement but sign magnitude. This allows
+        // easy conversion of ints and avoids using an extra byte for the sign.
         readonly int tail;
         readonly uint[] head;
 
@@ -26,10 +29,21 @@ namespace Bignum {
             this.tail = bottom;
         }
 
+        public Bignum(long value) {
+            int bottom = (int)(Math.Abs(value) & 0x7FFFFFFF);
+            if (value < 0)
+                bottom = (int) (((uint) bottom) | 0x80000000);
+
+            uint top = (uint)((Math.Abs(value) >> 31) & 0xFFFFFFFF);
+
+            this.head = top > 0 ? new[] { top } : null;
+            this.tail = bottom;
+        }
+
         public Bignum(ulong value) {
             int bottom = (int)(value & 0x7FFFFFFF);
             value = value >> 31;
-            uint chunk1 = (uint) (value & 0xFFFFFFFF);
+            uint chunk1 = (uint)(value & 0xFFFFFFFF);
             uint chunk2 = (value & 0x100000000) == 0 ? 0 : (uint)1;
 
             if (chunk1 == 0 && chunk2 == 0)
@@ -63,22 +77,37 @@ namespace Bignum {
             return value;
         }
 
+        public static explicit operator long(Bignum bignum) {
+            int sign = (bignum.tail & 0x80000000) == 0 ? 1 : -1;
+
+            long value = bignum.tail & 0x7FFFFFFF;
+
+            if (bignum.head != null) {
+                if (bignum.head.Length > 1)
+                    throw new OverflowException(); // Value too big.
+                else if (bignum.head.Length == 1)
+                    value += ((long)bignum.head[0]) << 31;
+            }
+
+            return value * sign;
+        }
+
         public static explicit operator ulong(Bignum bignum) {
             if (bignum.tail < 0)
                 throw new OverflowException(); // Can't cast negative to a ulong.
 
             ulong value = (ulong)bignum.tail;
             if (bignum.head != null) {
-                if(bignum.head.Length > 2)
+                if (bignum.head.Length > 2)
                     throw new OverflowException(); // Value too big.
                 else if (bignum.head.Length == 1)
-                    value += ((ulong) bignum.head[0]) << 31;
+                    value += ((ulong)bignum.head[0]) << 31;
                 else if (bignum.head.Length == 2) {
                     if (bignum.head[0] > 1)
                         throw new OverflowException(); // Value too big.
 
-                    value += ((ulong) bignum.head[0]) << 63;
-                    value += ((ulong) bignum.head[1]) << 31;
+                    value += ((ulong)bignum.head[0]) << 63;
+                    value += ((ulong)bignum.head[1]) << 31;
                 }
             }
 
