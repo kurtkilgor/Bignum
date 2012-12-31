@@ -35,6 +35,8 @@ namespace BignumTest {
             var value = GetRandomInt();
 
             Assert.AreEqual(value, (int)new Bignum(value));
+            Assert.AreEqual(Int32.MinValue, (int)new Bignum(Int32.MinValue));
+            Assert.AreEqual(Int32.MaxValue, (int)new Bignum(Int32.MaxValue));
         }
 
         [TestMethod]
@@ -42,6 +44,9 @@ namespace BignumTest {
             var value = GetRandomUint();
 
             Assert.AreEqual(value, (uint)new Bignum(value));
+            Assert.AreEqual(UInt32.MinValue, (uint)new Bignum(UInt32.MinValue));
+            Assert.AreEqual(UInt32.MaxValue, (uint)new Bignum(UInt32.MaxValue));
+
         }
 
         [TestMethod]
@@ -49,6 +54,8 @@ namespace BignumTest {
             var value = GetRandomLong();
 
             Assert.AreEqual(value, (long)new Bignum(value));
+            Assert.AreEqual(Int64.MinValue, (long)new Bignum(Int64.MinValue));
+            Assert.AreEqual(Int64.MaxValue, (long)new Bignum(Int64.MaxValue));
         }
 
         [TestMethod]
@@ -56,6 +63,9 @@ namespace BignumTest {
             var value = GetRandomUlong();
 
             Assert.AreEqual(value, (ulong)new Bignum(value));
+            Assert.AreEqual(UInt64.MinValue, (ulong)new Bignum(UInt64.MinValue));
+            Assert.AreEqual(UInt64.MaxValue, (ulong)new Bignum(UInt64.MaxValue));
+
         }
 
         [TestMethod]

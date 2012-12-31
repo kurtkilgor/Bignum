@@ -30,6 +30,14 @@ namespace Bignum {
         }
 
         public Bignum(long value) {
+            // Abs doesn't work on Int64.MinValue, so we have to use a workaround.
+            if (value == Int64.MinValue) {
+                this.head = new uint[] { 0x1, 0x0 };
+                this.tail = 0;
+                this.tail = (int)(((uint)this.tail) | 0x80000000);
+                return;
+            }
+
             int bottom = (int)(Math.Abs(value) & 0x7FFFFFFF);
             if (value < 0)
                 bottom = (int) (((uint) bottom) | 0x80000000);
@@ -83,10 +91,17 @@ namespace Bignum {
             long value = bignum.tail & 0x7FFFFFFF;
 
             if (bignum.head != null) {
-                if (bignum.head.Length > 1)
+                if (bignum.head.Length > 2)
                     throw new OverflowException(); // Value too big.
                 else if (bignum.head.Length == 1)
                     value += ((long)bignum.head[0]) << 31;
+                else if (bignum.head.Length == 2) {
+                    // The only allowed value here is Int64.MinValue
+                    if (bignum.head[0] == 1 && bignum.head[1] == 0 && value == 0)
+                        return Int64.MinValue;
+                    else
+                        throw new OverflowException();
+                }
             }
 
             return value * sign;
