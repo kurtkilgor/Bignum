@@ -117,5 +117,19 @@ namespace BignumTest {
             Assert.AreEqual(value, (ulong)bignum);
             var uintValue = (long)bignum; // Should overflow
         }
+
+        [TestMethod]
+        public void BasicEquality() {
+            var value = GetRandomUlong();
+
+            var v1 = new Bignum(value);
+            var v2 = new Bignum(value);
+
+            Assert.IsTrue(v1.Equals(v2));
+            Assert.IsTrue(v2.Equals(v1));
+            Assert.IsTrue(v1 == v2);
+            Assert.IsTrue(v1 == value);
+            Assert.IsTrue(v2 == value);
+        }
     }
 }
