@@ -97,5 +97,15 @@ namespace BignumTest {
             Assert.AreEqual(value, (ulong)bignum);
             var uintValue = (uint)bignum; // Should overflow
         }
+
+        [TestMethod]
+        [ExpectedException(typeof(OverflowException))]
+        public void CastUlongToLongOverflow() {
+            var value = UInt64.MaxValue;
+            var bignum = new Bignum(value);
+
+            Assert.AreEqual(value, (ulong)bignum);
+            var uintValue = (long)bignum; // Should overflow
+        }
     }
 }
