@@ -7,22 +7,23 @@ using System.Diagnostics;
 
 namespace Bignum {
     public struct Bignum {
-        // Tail stores the sign in its highest bit. The other bits indicate
+        // Tail stores the sign in its lowest bit. The other bits indicate
         // the absolute value of the number. Head extends the value in tail,
         // with the elements in order of decreasing significance.
         readonly uint tail;
         readonly uint[] head;
 
         public Bignum(int value) {
+            // Abs doesn't work on Int32.MinValue, so we have to use a workaround.            
             if (value == Int32.MinValue) {
-                this.head = new uint[] { 0x1 };
-                this.tail = 0x80000000;
+                this.head = new uint[] { 1 };
+                this.tail = 1;
                 return;
             }
 
-            uint bottom = (uint) (Math.Abs(value) & 0x7FFFFFFF);
+            uint bottom = (uint)(Math.Abs(value) & 0x7FFFFFFF) << 1;
             if (value < 0)
-                bottom = bottom | 0x80000000;
+                bottom = bottom | 0x1;
 
             this.head = null;
             this.tail = bottom;
@@ -30,7 +31,7 @@ namespace Bignum {
 
         public Bignum(uint value) {
             uint top = (value & 0x80000000) == 0 ? 0 : (uint)1;
-            uint bottom = (value & 0x7FFFFFFF);
+            uint bottom = (value & 0x7FFFFFFF) << 1;
 
             this.head = top > 0 ? new[] { top } : null;
             this.tail = bottom;
@@ -39,14 +40,14 @@ namespace Bignum {
         public Bignum(long value) {
             // Abs doesn't work on Int64.MinValue, so we have to use a workaround.
             if (value == Int64.MinValue) {
-                this.head = new uint[] { 0x1, 0x0 };
-                this.tail = 0x80000000;
+                this.head = new uint[] { 1, 0 };
+                this.tail = 1;
                 return;
             }
 
-            uint bottom = (uint)(Math.Abs(value) & 0x7FFFFFFF);
+            uint bottom = (uint)(Math.Abs(value) & 0x7FFFFFFF) << 1;
             if (value < 0)
-                bottom = (((uint) bottom) | 0x80000000);
+                bottom = (((uint)bottom) | 0x1);
 
             uint top = (uint)((Math.Abs(value) >> 31) & 0xFFFFFFFF);
 
@@ -55,7 +56,7 @@ namespace Bignum {
         }
 
         public Bignum(ulong value) {
-            uint bottom = (uint) (value & 0x7FFFFFFF);
+            uint bottom = (uint)(value & 0x7FFFFFFF) << 1;
             value = value >> 31;
             uint chunk1 = (uint)(value & 0xFFFFFFFF);
             uint chunk2 = (value & 0x100000000) == 0 ? 0 : (uint)1;
@@ -74,7 +75,7 @@ namespace Bignum {
                 if (tail == 0 && (head == null || head.Length == 0))
                     return 0;
 
-                return (tail & 0x80000000) == 0 ? 1 : -1;               
+                return (tail & 0x1) == 0 ? 1 : -1;
             }
         }
 
@@ -97,14 +98,14 @@ namespace Bignum {
         }
 
         public static explicit operator int(Bignum bignum) {
-            int value = (int) (bignum.tail & 0x7FFFFFFF);
+            int value = (int)(bignum.tail >> 1);
 
             if (bignum.head != null) {
                 if (bignum.head.Length > 1)
                     throw new OverflowException(); // Value too big.
                 else if (bignum.head.Length == 1) {
                     // The only allowed value here is Int32.MinValue
-                    if (bignum.head[0] == 1 && bignum.tail == 0x80000000)
+                    if (bignum.head[0] == 1 && bignum.tail == 1)
                         return Int32.MinValue;
                     else
                         throw new OverflowException();
@@ -118,7 +119,7 @@ namespace Bignum {
             if (bignum.Sign == -1)
                 throw new OverflowException(); // Can't cast negative to a uint.
 
-            uint value = (uint)bignum.tail;
+            uint value = (uint)(bignum.tail >> 1);
             if (bignum.head != null) {
                 if (bignum.head.Length > 1 || bignum.head[0] > 1)
                     throw new OverflowException(); // Value too big.
@@ -130,7 +131,7 @@ namespace Bignum {
         }
 
         public static explicit operator long(Bignum bignum) {
-            long value = bignum.tail & 0x7FFFFFFF;
+            long value = (bignum.tail >> 1);
 
             if (bignum.head != null) {
                 if (bignum.head.Length > 2)
@@ -139,7 +140,7 @@ namespace Bignum {
                     value += ((long)bignum.head[0]) << 31;
                 else if (bignum.head.Length == 2) {
                     // The only allowed value here is Int64.MinValue
-                    if (bignum.head[0] == 1 && bignum.head[1] == 0 && bignum.tail == 0x80000000)
+                    if (bignum.head[0] == 1 && bignum.head[1] == 0 && bignum.tail == 0x1)
                         return Int64.MinValue;
                     else
                         throw new OverflowException();
@@ -153,7 +154,7 @@ namespace Bignum {
             if (bignum.Sign == -1)
                 throw new OverflowException(); // Can't cast negative to a ulong.
 
-            ulong value = (ulong)bignum.tail;
+            ulong value = (ulong) (bignum.tail >> 1);
             if (bignum.head != null) {
                 if (bignum.head.Length > 2)
                     throw new OverflowException(); // Value too big.
@@ -214,10 +215,10 @@ namespace Bignum {
         public override int GetHashCode() {
             // Based on http://stackoverflow.com/a/263416
             int value = 17;
-            value = value * 23 + (int)(tail & 0x7FFFFFFF);
-            if(head != null)
+            value = value * 23 + (int)(tail >> 1);
+            if (head != null)
                 foreach (var item in head) {
-                    value = value * 23 + (int) (item & 0x7FFFFFFF);
+                    value = value * 23 + (int)(item & 0x7FFFFFFF);
                 }
 
             return value;
@@ -243,7 +244,7 @@ namespace Bignum {
                     numbits = bignum.head.Length * 32 + 31; // 31 bits for the tail, because it has a sign bit.
                 }
                 else {
-                    msb = bignum.tail << 1; // Shift away the sign bit
+                    msb = bignum.tail & 0xFFFFFFFE; // Remove the sign bit
                     numbits = 31;
                 }
 
@@ -288,12 +289,12 @@ namespace Bignum {
                         }
 
                         if (i < bignum.head.Length)
-                            value = bignum.head[i];                        
+                            value = bignum.head[i];
                         else
-                            value = bignum.tail << 1;
+                            value = bignum.tail;
                     }
                     else
-                        value = bignum.tail << 1;
+                        value = bignum.tail;
 
                     while (totalIndex > 0) {
                         value = value << 1;
@@ -320,7 +321,7 @@ namespace Bignum {
             }
 
             public void CopyTo(bool[] array, int arrayIndex) {
-                
+
             }
 
             public int Count {
@@ -343,7 +344,7 @@ namespace Bignum {
                         var headValue = bignum.head[i];
                         for (var j = 0; j < 32; j++) {
                             var bit = (headValue & 0x80000000) != 0;
-                            if(totalIndex++ >= bitOffset)
+                            if (totalIndex++ >= bitOffset)
                                 yield return bit;
                             headValue = headValue << 1;
                         }
@@ -352,7 +353,7 @@ namespace Bignum {
                     }
                 }
 
-                var tailValue = bignum.tail << 1;
+                var tailValue = bignum.tail;
                 for (var j = 0; j < 31; j++) {
                     var bit = (tailValue & 0x80000000) != 0;
                     if (totalIndex++ >= bitOffset)
