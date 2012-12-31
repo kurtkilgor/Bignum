@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2012 for Windows Desktop
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bignum", "Bignum\Bignum.csproj", "{962BEC07-29AE-43C8-B42C-C36B6EC0E01A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BignumTest", "BignumTest\BignumTest.csproj", "{D74B5ABC-24CF-4708-9D44-D3F76A15D742}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{962BEC07-29AE-43C8-B42C-C36B6EC0E01A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{962BEC07-29AE-43C8-B42C-C36B6EC0E01A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{962BEC07-29AE-43C8-B42C-C36B6EC0E01A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D74B5ABC-24CF-4708-9D44-D3F76A15D742}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D74B5ABC-24CF-4708-9D44-D3F76A15D742}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D74B5ABC-24CF-4708-9D44-D3F76A15D742}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D74B5ABC-24CF-4708-9D44-D3F76A15D742}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
