@@ -224,5 +224,146 @@ namespace Bignum {
         }
 
         #endregion
+
+        public IList<bool> BitList {
+            get { return new BitListClass(this); }
+        }
+
+        class BitListClass : IList<bool> {
+            readonly Bignum bignum;
+            readonly int numbits;
+            readonly int bitOffset;
+
+            public BitListClass(Bignum bignum) {
+                this.bignum = bignum;
+
+                uint msb;
+                if (bignum.head != null && bignum.head.Length > 0) {
+                    msb = bignum.head[0];
+                    numbits = bignum.head.Length * 32 + 31; // 31 bits for the tail, because it has a sign bit.
+                }
+                else {
+                    msb = bignum.tail << 1; // Shift away the sign bit
+                    numbits = 31;
+                }
+
+                bitOffset = 0;
+                while ((msb & 0x80000000) == 0) {
+                    msb = msb << 1;
+                    bitOffset++;
+                }
+
+                numbits -= bitOffset;
+            }
+
+            public int IndexOf(bool item) {
+                for (int i = 0; i < Count; i++) {
+                    if (this[i] == item)
+                        return i;
+                }
+
+                return -1;
+            }
+
+            public void Insert(int index, bool item) {
+                throw new InvalidOperationException();
+            }
+
+            public void RemoveAt(int index) {
+                throw new InvalidOperationException();
+            }
+
+            public bool this[int index] {
+                get {
+                    if (index > Count)
+                        throw new IndexOutOfRangeException();
+
+                    var totalIndex = index + bitOffset;
+                    uint value;
+                    if (bignum.head != null && bignum.head.Length > 0) {
+                        int i = 0;
+                        while (i < bignum.head.Length && totalIndex > 32) {
+                            totalIndex -= 32;
+                            i++;
+                        }
+
+                        if (i < bignum.head.Length)
+                            value = bignum.head[i];                        
+                        else
+                            value = bignum.tail << 1;
+                    }
+                    else
+                        value = bignum.tail << 1;
+
+                    while (totalIndex > 0) {
+                        value = value << 1;
+                        totalIndex--;
+                    }
+
+                    return (value & 0x80000000) != 0;
+                }
+                set {
+                    throw new InvalidOperationException();
+                }
+            }
+
+            public void Add(bool item) {
+                throw new InvalidOperationException();
+            }
+
+            public void Clear() {
+                throw new InvalidOperationException();
+            }
+
+            public bool Contains(bool item) {
+                return IndexOf(item) != -1;
+            }
+
+            public void CopyTo(bool[] array, int arrayIndex) {
+                
+            }
+
+            public int Count {
+                get { return numbits; }
+            }
+
+            public bool IsReadOnly {
+                get { return true; }
+            }
+
+            public bool Remove(bool item) {
+                throw new InvalidOperationException();
+            }
+
+            public IEnumerator<bool> GetEnumerator() {
+                int totalIndex = 0;
+                if (bignum.head != null) {
+                    int i = 0;
+                    while (i < bignum.head.Length) {
+                        var headValue = bignum.head[i];
+                        for (var j = 0; j < 32; j++) {
+                            var bit = (headValue & 0x80000000) != 0;
+                            if(totalIndex++ >= bitOffset)
+                                yield return bit;
+                            headValue = headValue << 1;
+                        }
+
+                        i++;
+                    }
+                }
+
+                var tailValue = bignum.tail << 1;
+                for (var j = 0; j < 31; j++) {
+                    var bit = (tailValue & 0x80000000) != 0;
+                    if (totalIndex++ >= bitOffset)
+                        yield return bit;
+                    tailValue = tailValue << 1;
+                }
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() {
+                return GetEnumerator();
+            }
+        }
     }
 }
