@@ -8,22 +8,24 @@ using System.Diagnostics;
 namespace Bignum {
     public partial struct Natural {
         public static Natural operator *(Natural a, uint b) {
-            ulong product = ((ulong)a.tail) * b;
-            uint newTail = (uint)(product & 0xFFFFFFFF);
-            uint carry = (uint)(product >> 32);
+            var uints = new List<uint>(a.WalkUints());
+            uints.Reverse();
 
-            var newHead = new List<uint>(a.head.Length);
-
-            for (var i = 0; i < a.head.Length; i++) {
-                product = ((ulong)a.head[i]) * b + carry;
-                newHead.Add((uint)(product & 0xFFFFFFFF));
+            uint carry = 0;
+            for (var i = 0; i < uints.Count; i++) {
+                ulong product = ((ulong)uints[i]) * b + carry;
+                uints[i] = (uint)(product & 0xFFFFFFFF);
                 carry = (uint)(product >> 32);
             }
 
             if (carry != 0)
-                newHead.Add(carry);
+                uints.Add(carry);
 
-            return new Natural(newTail, newHead.ToArray());
+            uint newTail = uints[0];
+            uints.RemoveAt(0);
+            uints.Reverse();
+
+            return new Natural(newTail, uints.ToArray());
         }
 
         public static Natural operator *(Natural a, Natural b) {
@@ -44,6 +46,14 @@ namespace Bignum {
             }
 
             return partialProducts.Aggregate((u, v) => u + v);
+        }
+
+        public Natural Factorial() {
+            var result = new Natural(1);
+            for (Natural i = new Natural(1); i <= this; i++) {
+                result = result * i;
+            }
+            return result;
         }
     }
 }

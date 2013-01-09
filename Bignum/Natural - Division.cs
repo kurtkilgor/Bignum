@@ -86,5 +86,17 @@ namespace Bignum {
                 quotient = new Natural(tail, uints.ToArray());
             }
         }
+
+        public static Natural operator /(Natural a, Natural b) {
+            Natural quotient, remainder;
+            Divide(a, b, out quotient, out remainder);
+            return quotient;
+        }
+
+        public static Natural operator %(Natural a, Natural b) {
+            Natural quotient, remainder;
+            Divide(a, b, out quotient, out remainder);
+            return remainder;
+        }
     }
 }

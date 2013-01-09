@@ -88,5 +88,33 @@ namespace BignumTest {
 
             Assert.AreEqual(value.ToString(), (new Natural(value)).ToString());
         }
+
+        [TestMethod]
+        public void BasicDivisionTest() {
+            var value = GetRandomUlong();
+            var value2 = GetRandomUlong();
+
+            var quotient = value / value2;
+            var remainder = value % value2;
+
+            Assert.AreEqual(quotient, (ulong) (new Natural(value) / new Natural(value2)));
+            Assert.AreEqual(remainder, (ulong)(new Natural(value) % new Natural(value2)));
+        }
+
+        [TestMethod]
+        public void Factorial21Test() {
+            Assert.AreEqual("51090942171709440000", new Natural(21).Factorial().ToString());
+        }
+
+        [TestMethod]
+        public void Factorial30Test() {
+            Assert.AreEqual("265252859812191058636308480000000", new Natural(30).Factorial().ToString());
+        }
+
+        [TestMethod]
+        public void Factorial50Test() {
+            Assert.AreEqual("30414093201713378043612608166064768844377641568960512000000000000", 
+                            new Natural(50).Factorial().ToString());
+        }
     }
 }

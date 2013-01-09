@@ -8,22 +8,26 @@ using System.Diagnostics;
 namespace Bignum {
     public partial struct Natural {
         public static Natural operator +(Natural a, Natural b) {
-            ulong sum = ((ulong)a.tail) + b.tail;
-            uint newTail = (uint) (sum & 0xFFFFFFFF);
-            uint carry = (uint) (sum >> 32);
+            var uintsA = new List<uint>(a.WalkUints());
+            var uintsB = new List<uint>(b.WalkUints());
 
-            int headALength = a.head.Length;
-            int headBLength = b.head.Length;
+            uintsA.Reverse();
+            uintsB.Reverse();
+
+            uint carry = 0;
+
+            int headALength = a.head.Length + 1; 
+            int headBLength = b.head.Length + 1;
             int maxLength = headALength > headBLength ? headALength : headBLength;
 
             var newHead = new List<uint>(maxLength);
 
             for (var i = 0; i < maxLength; i++) {
-                sum = carry;
+                ulong sum = carry;
                 if (i < headALength)
-                    sum += a.head[i];
+                    sum += uintsA[i];
                 if (i < headBLength)
-                    sum += b.head[i];
+                    sum += uintsB[i];
 
                 newHead.Add((uint)(sum & 0xFFFFFFFF));
                 carry = (uint)(sum >> 32);
@@ -32,6 +36,10 @@ namespace Bignum {
             if (carry != 0)
                 newHead.Add(carry);
 
+            uint newTail = newHead[0];
+            newHead.RemoveAt(0);
+            newHead.Reverse();
+
             return new Natural(newTail, newHead.ToArray());
         }
 
@@ -39,22 +47,26 @@ namespace Bignum {
             if (b > a)
                 return -(b - a);
 
-            long sum = ((long)a.tail) - b.tail;
-            uint newTail = (uint)(Math.Abs(sum) & 0xFFFFFFFF);
-            int carry = (int)(sum >> 32);
+            var uintsA = new List<uint>(a.WalkUints());
+            var uintsB = new List<uint>(b.WalkUints());
 
-            int headALength = a.head.Length;
-            int headBLength = b.head.Length;
+            uintsA.Reverse();
+            uintsB.Reverse();
+
+            int carry = 0;
+
+            int headALength = a.head.Length + 1;
+            int headBLength = b.head.Length + 1;
             int maxLength = headALength > headBLength ? headALength : headBLength;
 
             var newHead = new List<uint>(maxLength);
 
             for (var i = 0; i < maxLength; i++) {
-                sum = carry;
+                long sum = carry;
                 if (i < headALength)
-                    sum += a.head[i];
+                    sum += uintsA[i];
                 if (i < headBLength)
-                    sum -= b.head[i];
+                    sum -= uintsB[i];
 
                 newHead.Add((uint)(Math.Abs(sum) & 0xFFFFFFFF));
                 carry = (int)(sum >> 32);
@@ -64,7 +76,15 @@ namespace Bignum {
                 newHead.Add((uint) Math.Abs(carry)); 
                 // By construction, this value will always be positive.
 
+            uint newTail = newHead[0];
+            newHead.RemoveAt(0);
+            newHead.Reverse();
+
             return new Integer((sbyte) 1, new Natural(newTail, newHead.ToArray()));
+        }
+
+        public static Natural operator ++(Natural a) {
+            return a + 1;
         }
     }
 }
