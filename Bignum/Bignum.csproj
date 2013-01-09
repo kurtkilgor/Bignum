@@ -39,6 +39,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Integer.cs" />
+    <Compile Include="Natural - Addition.cs" />
+    <Compile Include="Natural - Multiplication.cs" />
     <Compile Include="Natural.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

@@ -73,5 +73,13 @@ namespace BignumTest {
             Assert.IsTrue(v1 == value);
             Assert.IsTrue(v2 == value);
         }
+
+        [TestMethod]
+        public void BasicAdditionMultiplicationTest() {
+            var value = new Natural(ulong.MaxValue);
+
+            Assert.AreEqual(value + value, value * 2);
+            Assert.AreEqual(value + value + value, value * 3);
+        }
     }
 }
