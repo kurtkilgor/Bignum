@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Integer.cs" />
     <Compile Include="Natural - Addition.cs" />
+    <Compile Include="Natural - Division.cs" />
     <Compile Include="Natural - Multiplication.cs" />
     <Compile Include="Natural.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

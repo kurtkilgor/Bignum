@@ -39,7 +39,7 @@ namespace Bignum {
             if (b > a)
                 return -(b - a);
 
-            long sum = ((long)a.tail) + b.tail;
+            long sum = ((long)a.tail) - b.tail;
             uint newTail = (uint)(Math.Abs(sum) & 0xFFFFFFFF);
             int carry = (int)(sum >> 32);
 

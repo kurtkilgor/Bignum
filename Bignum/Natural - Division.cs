@@ -23,16 +23,17 @@ namespace Bignum {
                     var bit = (item & mask) != 0;
                     if (bit)
                         oneSeen = true;
+
+                    mask = mask >> 1;
                     if (!oneSeen)
                         continue;
                     yield return bit;
-                    mask = mask >> 1;
                 }
             }
         }
 
         public static void Divide(Natural a, Natural b, out Natural quotient, out Natural remainder) {
-            // Taken from http://en.wikipedia.org/wiki/Division_algorithm
+            // Taken from http://en.wikipedia.org/wiki/Division_algorithm#Integer_division_.28unsigned.29_with_remainder
 
             if (b == 0)
                 throw new DivideByZeroException();
@@ -46,7 +47,7 @@ namespace Bignum {
                 if (bit)
                     remainder += 1;
 
-                if (remainder > b) {
+                if (remainder >= b) {
                     remainder = (remainder - b).Magnitude;
                     q.Add(true);
                 }
@@ -71,16 +72,19 @@ namespace Bignum {
                 currentMask = currentMask << 1;
             }
 
-            if (currentMask != 0 && current != 0)
-                uints.Add(current);
+            uints.Add(current);
 
-            var tail = uints[0];
-            uints.RemoveAt(0);
-            uints.Reverse();
-            while (uints.Count > 0 && uints[0] == 0)
+            if (uints.Count == 0)
+                quotient = 0;
+            else {
+                var tail = uints[0];
                 uints.RemoveAt(0);
+                uints.Reverse();
+                while (uints.Count > 0 && uints[0] == 0)
+                    uints.RemoveAt(0);
 
-            quotient = new Natural(tail, uints.ToArray());
+                quotient = new Natural(tail, uints.ToArray());
+            }
         }
     }
 }

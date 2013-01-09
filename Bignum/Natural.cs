@@ -176,5 +176,20 @@ namespace Bignum {
         }
 
         #endregion
+
+        public override string ToString() {
+            var s = new StringBuilder();
+            var a = this;
+            while(a > 0) {
+                Natural quotient;
+                Natural remainder;
+                Divide(a, 10, out quotient, out remainder);
+                var digit = (uint) remainder;
+                s.Insert(0, digit.ToString());
+                a = quotient;
+            }
+
+            return s.ToString();
+        }
     }
 }

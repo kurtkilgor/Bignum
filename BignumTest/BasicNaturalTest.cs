@@ -81,5 +81,12 @@ namespace BignumTest {
             Assert.AreEqual(value + value, value * 2);
             Assert.AreEqual(value + value + value, value * 3);
         }
+
+        [TestMethod]
+        public void BasicToStringTest() {
+            var value = GetRandomUlong();
+
+            Assert.AreEqual(value.ToString(), (new Natural(value)).ToString());
+        }
     }
 }
