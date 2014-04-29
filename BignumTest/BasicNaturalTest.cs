@@ -75,6 +75,28 @@ namespace BignumTest {
         }
 
         [TestMethod]
+        public void BasicComparisonTest() {
+            var value = GetRandomUlong();
+
+            var v1 = new Natural(value);
+            var v2 = v1 * GetRandomUlong();
+
+            Assert.IsTrue(v2 > v1);
+            Assert.IsFalse(v1 > v2);
+            
+            Assert.IsTrue(v1 < v2);
+            Assert.IsFalse(v2 < v1);
+            
+            Assert.IsTrue(v2 >= v2);
+            Assert.IsTrue(v2 >= v1);
+            Assert.IsFalse(v1 >= v2);
+
+            Assert.IsTrue(v1 <= v1);
+            Assert.IsTrue(v1 <= v2);
+            Assert.IsFalse(v2 <= v1);
+        }
+
+        [TestMethod]
         public void BasicAdditionMultiplicationTest() {
             var value = new Natural(ulong.MaxValue);
 

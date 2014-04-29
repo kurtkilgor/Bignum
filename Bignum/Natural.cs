@@ -107,20 +107,23 @@ namespace Bignum {
 
         #region Comparison Operators
 
+        static bool CompareEqualLengthHeads(Natural a, Natural b, Func<uint, uint, bool> op) {
+            for (var i = 0; i < a.head.Length; i++) {
+                if (a.head[i] == b.head[i])
+                    continue;
+
+                return op(a.head[i], b.head[i]);
+            }
+
+            return op(a.tail, b.tail);
+        }
+
         public static bool operator <(Natural a, Natural b) {
             int headALength = a.head.Length;
             int headBLength = b.head.Length;
 
-            if (headALength == headBLength) {
-                for (var i = 0; i < headALength; i++) {
-                    if (a.head[i] == b.head[i])
-                        continue;
-
-                    return a.head[i] < b.head[i];
-                }
-
-                return a.tail < b.tail;
-            }
+            if (headALength == headBLength)
+                return CompareEqualLengthHeads(a, b, (x, y) => x < y);
             else return headALength < headBLength;
         }
 
@@ -128,16 +131,8 @@ namespace Bignum {
             int headALength = a.head.Length;
             int headBLength = b.head.Length;
 
-            if (headALength == headBLength) {
-                for (var i = 0; i < headALength; i++) {
-                    if (a.head[i] == b.head[i])
-                        continue;
-
-                    return a.head[i] > b.head[i];
-                }
-
-                return a.tail > b.tail;
-            }
+            if (headALength == headBLength)
+                return CompareEqualLengthHeads(a, b, (x, y) => x > y);
             else return headALength > headBLength;
         }
 
@@ -145,16 +140,8 @@ namespace Bignum {
             int headALength = a.head.Length;
             int headBLength = b.head.Length;
 
-            if (headALength == headBLength) {
-                for (var i = 0; i < headALength; i++) {
-                    if (a.head[i] == b.head[i])
-                        continue;
-
-                    return a.head[i] < b.head[i];
-                }
-
-                return a.tail <= b.tail;
-            }
+            if (headALength == headBLength)
+                return CompareEqualLengthHeads(a, b, (x, y) => x <= y);
             else return headALength < headBLength;
         }
 
@@ -162,16 +149,8 @@ namespace Bignum {
             int headALength = a.head.Length;
             int headBLength = b.head.Length;
 
-            if (headALength == headBLength) {
-                for (var i = 0; i < headALength; i++) {
-                    if (a.head[i] == b.head[i])
-                        continue;
-
-                    return a.head[i] > b.head[i];
-                }
-
-                return a.tail >= b.tail;
-            }
+            if (headALength == headBLength)
+                return CompareEqualLengthHeads(a, b, (x, y) => x >= y);
             else return headALength > headBLength;
         }
 
